@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>電動不求人 控制中心</title>
+  <style>
+    body {
+      font-family: 'Microsoft JhengHei', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .logout-btn {
+      background-color: #ccc;
+      color: black;
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 登入畫面 -->
+  <div class="container" id="loginView">
+    <h2>電動不求人 登入</h2>
+    <input type="text" id="codeInput" placeholder="輸入電動不求人的代碼" />
+    <button class="btn" onclick="login()">登入</button>
+  </div>
+
+  <!-- 控制畫面 -->
+  <div class="container" id="controlView" style="display:none;">
+    <h2>電動不求人控制中心</h2>
+
+    <button class="btn" onclick="startDevice()">啟動</button>
+    <button class="btn" onclick="stopDevice()">停止</button>
+
+    <div style="margin-top: 15px;">
+      <label>速度調整：</label>
+      <input type="range" min="1" max="5" value="2" id="speedSlider" oninput="updateStatus()" />
+    </div>
+
+    <button class="btn" onclick="toggleStretch()">伸出</button>
+    <button class="btn" onclick="toggleShrink()">縮回</button>
+
+    <div class="status" id="statusText">📡 裝置已停止</div>
+    <div class="status" id="motionText"></div>
+    <div class="status" id="codeDisplay"></div>
+
+    <button class="logout-btn btn" onclick="logout()">登出</button>
+  </div>
+
+  <script>
+    let isRunning = false;
+    let isStretching = false;
+    let isShrinking = false;
+    let code = "";
+
+    function login() {
+      const inputCode = document.getElementById("codeInput").value.trim();
+      if (inputCode === "") {
+        alert("請輸入代碼");
+        return;
+      }
+
+      code = inputCode;
+      document.getElementById("loginView").style.display = "none";
+      document.getElementById("controlView").style.display = "block";
+      document.getElementById("codeDisplay").textContent = "代碼：" + code;
+    }
+
+    function logout() {
+      code = "";
+      isRunning = false;
+      isStretching = false;
+      isShrinking = false;
+      document.getElementById("codeInput").value = "";
+      document.getElementById("loginView").style.display = "block";
+      document.getElementById("controlView").style.display = "none";
+      updateStatus();
+      updateMotionText();
+    }
+
+    function startDevice() {
+      isRunning = true;
+      updateStatus();
+    }
+
+    function stopDevice() {
+      isRunning = false;
+      updateStatus();
+    }
+
+    function updateStatus() {
+      const speed = document.getElementById("speedSlider").value;
+      const statusText = document.getElementById("statusText");
+
+      if (isRunning) {
+        statusText.textContent = `📡 正在運行：抓癢中｜速度 - ${speed}`;
+      } else {
+        statusText.textContent = "📡 裝置已停止";
+      }
+    }
+
+    function toggleStretch() {
+      if (isStretching) {
+        isStretching = false;
+        document.getElementById("motionText").textContent = "停止伸出";
+      } else {
+        isStretching = true;
+        isShrinking = false;
+        document.getElementById("motionText").textContent = "伸出中";
+      }
+    }
+
+    function toggleShrink() {
+      if (isShrinking) {
+        isShrinking = false;
+        document.getElementById("motionText").textContent = "停止縮回";
+      } else {
+        isShrinking = true;
+        isStretching = false;
+        document.getElementById("motionText").textContent = "縮回中";
+      }
+    }
+
+    function updateMotionText() {
+      if (isStretching) {
+        document.getElementById("motionText").textContent = "伸出中";
+      } else if (isShrinking) {
+        document.getElementById("motionText").textContent = "縮回中";
+      } else {
+        document.getElementById("motionText").textContent = "";
+      }
+    }
+  </script>
+</body>
+</html>
